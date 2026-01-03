@@ -1,6 +1,6 @@
 # Grammar Fix Desktop App
 
-A simple background application that fixes grammar and spelling of selected text using Google Gemini.
+A simple background application that fixes grammar and spelling of selected text using Groq API.
 
 ## Setup
 
@@ -16,8 +16,8 @@ A simple background application that fixes grammar and spelling of selected text
       ```bash
       copy .env.example .env
       ```
-    - Open `.env` and replace `your_api_key_here` with your actual Google Gemini API key.
-    - Get your API key from: https://makersuite.google.com/app/apikey
+    - Open `.env` and replace `your_api_key_here` with your actual Groq API key.
+    - Get your API key from: https://console.groq.com/keys
     
     **Security Note**: Never commit your `.env` file to version control. It's already excluded in `.gitignore`.
 

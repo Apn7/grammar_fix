@@ -1,0 +1,6 @@
+google-generativeai
+pyperclip
+keyboard
+PyQt6
+python-dotenv
+requests

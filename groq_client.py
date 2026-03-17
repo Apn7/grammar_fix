@@ -4,10 +4,12 @@ from config import GROQ_API_KEY
 
 
 class GroqClient:
-    def __init__(self):
+    def __init__(self, model="llama-3.3-70b-versatile"):
         self.api_key = GROQ_API_KEY
+        if not self.api_key:
+            raise ValueError("Groq API key is not configured.")
         self.api_url = "https://api.groq.com/openai/v1/chat/completions"
-        self.model = "llama-3.3-70b-versatile"
+        self.model = model
         self.headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",

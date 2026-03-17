@@ -3,12 +3,15 @@ from PyQt6.QtGui import QCloseEvent, QCursor, QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
     QApplication,
     QBoxLayout,
+    QButtonGroup,
     QCheckBox,
+    QComboBox,
     QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QRadioButton,
     QScrollArea,
     QSizePolicy,
     QVBoxLayout,
@@ -18,6 +21,8 @@ from PyQt6.QtWidgets import (
 
 class ControlCenterWindow(QWidget):
     request_mode = pyqtSignal(str)
+    provider_changed = pyqtSignal(str)
+    provider_model_changed = pyqtSignal(str, str)
     startup_toggled = pyqtSignal(bool)
     quit_requested = pyqtSignal()
     hide_requested = pyqtSignal()
@@ -160,6 +165,43 @@ class ControlCenterWindow(QWidget):
                 background-color: #46c4ff;
                 border: 1px solid #46c4ff;
             }
+            QRadioButton {
+                color: #f8fbff;
+                font-size: 14px;
+                font-weight: 600;
+                spacing: 10px;
+            }
+            QRadioButton::indicator {
+                width: 18px;
+                height: 18px;
+                border-radius: 9px;
+                border: 1px solid #43658e;
+                background-color: #08111f;
+            }
+            QRadioButton::indicator:checked {
+                border: 5px solid #46c4ff;
+                background-color: #08111f;
+            }
+            QComboBox {
+                min-height: 42px;
+                border-radius: 12px;
+                padding: 0 14px;
+                font-size: 13px;
+                font-weight: 600;
+                color: #f8fbff;
+                background-color: #132844;
+                border: 1px solid #2d5076;
+            }
+            QComboBox::drop-down {
+                border: none;
+                width: 28px;
+            }
+            QComboBox QAbstractItemView {
+                color: #f8fbff;
+                background-color: #0f213b;
+                border: 1px solid #2d5076;
+                selection-background-color: #214066;
+            }
             """
         )
 
@@ -215,6 +257,64 @@ class ControlCenterWindow(QWidget):
         self.header_row.addWidget(self.status_pill)
 
         layout.addLayout(self.header_row)
+
+        provider_card = self.build_card(
+            "AI Provider",
+            "Choose which provider powers all four shortcuts across the app.",
+        )
+        provider_layout = provider_card.layout()
+
+        self.provider_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self.provider_row.setSpacing(18)
+
+        self.provider_group = QButtonGroup(self)
+        self.provider_group.setExclusive(True)
+
+        self.groq_radio = QRadioButton("Groq")
+        self.google_radio = QRadioButton("Google Gemini")
+        self.provider_group.addButton(self.groq_radio)
+        self.provider_group.addButton(self.google_radio)
+        self.provider_row.addWidget(self.groq_radio)
+        self.provider_row.addWidget(self.google_radio)
+        self.provider_row.addStretch(1)
+
+        self.groq_radio.toggled.connect(lambda checked: self.on_provider_selected("groq", checked))
+        self.google_radio.toggled.connect(lambda checked: self.on_provider_selected("google", checked))
+
+        provider_layout.addLayout(self.provider_row)
+
+        self.provider_hint_label = QLabel("Groq is active for all shortcuts.")
+        self.provider_hint_label.setObjectName("body")
+        self.provider_hint_label.setWordWrap(True)
+        provider_layout.addWidget(self.provider_hint_label)
+
+        provider_models_grid = QGridLayout()
+        provider_models_grid.setHorizontalSpacing(12)
+        provider_models_grid.setVerticalSpacing(10)
+
+        groq_model_label = QLabel("Groq model")
+        groq_model_label.setObjectName("body")
+        provider_models_grid.addWidget(groq_model_label, 0, 0)
+
+        self.groq_model_combo = QComboBox()
+        self.groq_model_combo.currentTextChanged.connect(
+            lambda model: self.on_provider_model_changed("groq", model)
+        )
+        provider_models_grid.addWidget(self.groq_model_combo, 1, 0)
+
+        google_model_label = QLabel("Google model")
+        google_model_label.setObjectName("body")
+        provider_models_grid.addWidget(google_model_label, 0, 1)
+
+        self.google_model_combo = QComboBox()
+        self.google_model_combo.currentTextChanged.connect(
+            lambda model: self.on_provider_model_changed("google", model)
+        )
+        provider_models_grid.addWidget(self.google_model_combo, 1, 1)
+
+        provider_layout.addLayout(provider_models_grid)
+
+        layout.addWidget(provider_card)
 
         quick_actions = self.build_card(
             "Quick Actions",
@@ -369,12 +469,16 @@ class ControlCenterWindow(QWidget):
     def update_responsive_layouts(self):
         content_width = self.scroll_area.viewport().width() or self.width()
         header_compact = content_width < 760
+        provider_compact = content_width < 760
         quick_compact = content_width < 980
         middle_compact = content_width < 760
         footer_compact = content_width < 760
 
         self.header_row.setDirection(
             QBoxLayout.Direction.TopToBottom if header_compact else QBoxLayout.Direction.LeftToRight
+        )
+        self.provider_row.setDirection(
+            QBoxLayout.Direction.TopToBottom if provider_compact else QBoxLayout.Direction.LeftToRight
         )
         self.quick_button_row.setDirection(
             QBoxLayout.Direction.TopToBottom if quick_compact else QBoxLayout.Direction.LeftToRight
@@ -408,6 +512,47 @@ class ControlCenterWindow(QWidget):
             self.startup_hint.setText(
                 "Grammar Fix will stay off until you launch it yourself."
             )
+
+    def on_provider_selected(self, provider, checked):
+        if checked:
+            self.provider_changed.emit(provider)
+
+    def on_provider_model_changed(self, provider, model):
+        if model:
+            self.provider_model_changed.emit(provider, model)
+
+    def set_selected_provider(self, provider):
+        selected = provider if provider in {"groq", "google"} else "groq"
+        self.groq_radio.blockSignals(True)
+        self.google_radio.blockSignals(True)
+        self.groq_radio.setChecked(selected == "groq")
+        self.google_radio.setChecked(selected == "google")
+        self.groq_radio.blockSignals(False)
+        self.google_radio.blockSignals(False)
+
+        if selected == "google":
+            self.provider_hint_label.setText(
+                "Google Gemini will handle grammar, translation, code explanation, and smart text help."
+            )
+            self.groq_model_combo.setEnabled(False)
+            self.google_model_combo.setEnabled(True)
+        else:
+            self.provider_hint_label.setText(
+                "Groq will handle grammar, translation, code explanation, and smart text help."
+            )
+            self.groq_model_combo.setEnabled(True)
+            self.google_model_combo.setEnabled(False)
+
+    def set_model_options(self, provider, models, selected_model):
+        combo = self.google_model_combo if provider == "google" else self.groq_model_combo
+        combo.blockSignals(True)
+        combo.clear()
+        combo.addItems(models)
+        if selected_model in models:
+            combo.setCurrentText(selected_model)
+        elif models:
+            combo.setCurrentIndex(0)
+        combo.blockSignals(False)
 
     def set_status(self, title, message, tone="info"):
         palette = {

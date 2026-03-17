@@ -27,6 +27,7 @@ wheels/
 # Environment variables
 .env
 .env.local
+user_settings.json
 
 # PyInstaller
 *.spec

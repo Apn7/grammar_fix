@@ -1,6 +1,6 @@
 # Grammar Fix Desktop App
 
-Grammar Fix is a desktop background application that corrects grammar and spelling for selected text using AI providers (Groq and Google Generative AI). It runs in the system tray, listens for a global hotkey, and shows an overlay to apply corrections instantly.
+Grammar Fix is a desktop background application for selected text that supports four AI-assisted workflows: grammar/spelling correction, English ↔ Bengali translation, code explanation, and smart summarize/explain. It runs in the system tray, listens for global hotkeys, and shows an overlay to review and apply results instantly.
 
 ## Table of Contents
 

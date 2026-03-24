@@ -1,39 +1,104 @@
 # Grammar Fix Desktop App
 
-A simple background application that fixes grammar and spelling of selected text using Groq API.
+Grammar Fix is a desktop background application that corrects grammar and spelling for selected text using AI providers (Groq and Google Generative AI). It runs in the system tray, listens for a global hotkey, and shows an overlay to apply corrections instantly.
 
-## Setup
+## Table of Contents
 
-1.  **Install Python**: Ensure you have Python 3.7 or higher installed.
+- [Features](#features)
+- [Requirements](#requirements)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Codebase Index](#codebase-index)
+- [Operational Notes](#operational-notes)
+- [Troubleshooting](#troubleshooting)
+- [Security](#security)
 
-2.  **Install Dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+## Features
 
-3.  **Configure API Key**:
-    - Copy `.env.example` to `.env`:
-      ```bash
-      copy .env.example .env
-      ```
-    - Open `.env` and replace `your_api_key_here` with your actual Groq API key.
-    - Get your API key from: https://console.groq.com/keys
-    
-    **Security Note**: Never commit your `.env` file to version control. It's already excluded in `.gitignore`.
+- Global hotkey correction workflow (**Ctrl+Shift+1**)
+- System tray background operation
+- Overlay-based review before applying fixes
+- Provider abstraction for multiple AI backends
+- Persistent settings for provider/model preferences
+
+## Requirements
+
+- Python 3.7+
+- Desktop environment with clipboard access
+- Internet access for API calls
+- Windows is the primary supported platform (global hotkey behavior may require elevated privileges)
+
+## Quick Start
+
+1. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Create environment file:
+   - macOS/Linux:
+     ```bash
+     cp .env.example .env
+     ```
+   - Windows:
+     ```bat
+     copy .env.example .env
+     ```
+3. Update `.env` with your provider keys.
+4. Start the app:
+   ```bash
+   python main.py
+   ```
+
+## Configuration
+
+Environment variables are loaded from `.env`:
+
+- `GROQ_API_KEY`: API key for Groq (https://console.groq.com/keys)
+- `GEMINI_API_KEY`: API key for Google Generative AI (if using Gemini)
+
+Provider/model runtime selection is managed by the Control Center and persisted by `settings_manager.py`.
 
 ## Usage
 
-1.  Run the application:
-    ```bash
-    python main.py
-    ```
-2.  The app will run in the background (check your system tray for a green icon).
-3.  Select any text in any application.
-4.  Press **Ctrl+Shift+1**.
-5.  An overlay will appear with the suggested correction.
-6.  Click **Fix & Replace** to replace your selected text with the corrected version, or **Dismiss** to ignore.
+1. Launch the app with `python main.py`.
+2. Select text in any application.
+3. Press **Ctrl+Shift+1**.
+4. Review the suggestion in the overlay.
+5. Choose **Fix & Replace** to apply, or **Dismiss** to cancel.
+
+## Codebase Index
+
+| File | Responsibility |
+| --- | --- |
+| `main.py` | Entry point, application lifecycle, hotkey orchestration, and workflow coordination |
+| `overlay.py` | Correction overlay UI and user interaction handling |
+| `control_center.py` | Main control UI for provider/model selection and app controls |
+| `provider_manager.py` | Unified provider routing and correction request dispatch |
+| `groq_client.py` | Groq API integration and response parsing |
+| `gemini_client.py` | Google Generative AI integration |
+| `settings_manager.py` | Persistent settings read/write |
+| `startup_manager.py` | Startup behavior integration |
+| `clipboard_utils.py` | Clipboard access and helper operations |
+| `config.py` | Shared constants/configuration values |
+| `test_imports.py` | Basic dependency/import smoke-check script |
+| `requirements.txt` | Runtime dependency list |
+| `.env.example` | Template for required environment variables |
+| `SECURITY_IMPROVEMENTS.md` | Security-focused implementation notes |
+
+## Operational Notes
+
+- The app runs as a background process and is controlled from the system tray icon.
+- Hotkey interception can be blocked by privileged applications; running with elevated permissions may be required on Windows.
+- Provider/model availability depends on valid API credentials and network connectivity.
 
 ## Troubleshooting
 
--   **Hotkey not working?** Try running the script as Administrator, as some apps block key interception.
--   **No overlay?** Check the console output for errors. Ensure you have a valid internet connection and API key.
+- **Hotkey not working**: Run as Administrator (Windows) and confirm no other app is consuming the same shortcut.
+- **No correction result**: Verify API key(s), internet connectivity, and provider selection in Control Center.
+- **Import errors**: Reinstall dependencies with `pip install -r requirements.txt` in the active Python environment.
+
+## Security
+
+- Never commit `.env` or API keys.
+- Review `SECURITY_IMPROVEMENTS.md` for implemented safeguards and recommended operating practices.

@@ -25,7 +25,7 @@ Grammar Fix is a desktop background application that corrects grammar and spelli
   - Longer input is summarized
   - Shorter input is explained
 - System tray background operation with quick actions for all workflows
-- Overlay-based result review before replacing/copied output
+- Overlay-based result review before replacing text or copying output
 - Provider abstraction for Groq and Google Gemini backends
 - Runtime provider/model switching from Control Center
 - Persistent settings for provider/model preferences
@@ -63,7 +63,7 @@ Grammar Fix is a desktop background application that corrects grammar and spelli
 
 Environment variables are loaded from `.env`:
 
-- `GROQ_API_KEY`: API key for Groq (https://console.groq.com/keys)
+- `GROQ_API_KEY`: API key for Groq ([https://console.groq.com/keys](https://console.groq.com/keys))
 - `GEMINI_API_KEY`: API key for Google Generative AI (if using Gemini)
 
 Provider/model runtime selection is managed by the Control Center and persisted by `settings_manager.py`.

@@ -16,11 +16,20 @@ Grammar Fix is a desktop background application that corrects grammar and spelli
 
 ## Features
 
-- Global hotkey correction workflow (**Ctrl+Shift+1**)
-- System tray background operation
-- Overlay-based review before applying fixes
-- Provider abstraction for multiple AI backends
+- Four global hotkey workflows:
+  - **Ctrl+Shift+1**: Grammar fix
+  - **Ctrl+Shift+2**: English ↔ Bengali translation
+  - **Ctrl+Shift+3**: Code explanation
+  - **Ctrl+Shift+4**: Smart text help (auto-select summary or explanation)
+- Smart mode behavior:
+  - Longer input is summarized
+  - Shorter input is explained
+- System tray background operation with quick actions for all workflows
+- Overlay-based result review before replacing/copied output
+- Provider abstraction for Groq and Google Gemini backends
+- Runtime provider/model switching from Control Center
 - Persistent settings for provider/model preferences
+- Optional **Start With Windows** support (Windows)
 
 ## Requirements
 
@@ -62,10 +71,18 @@ Provider/model runtime selection is managed by the Control Center and persisted 
 ## Usage
 
 1. Launch the app with `python main.py`.
-2. Select text in any application.
-3. Press **Ctrl+Shift+1**.
-4. Review the suggestion in the overlay.
-5. Choose **Fix & Replace** to apply, or **Dismiss** to cancel.
+2. Keep it running in the system tray.
+3. Select text in any application.
+4. Use one of the global shortcuts:
+   - **Ctrl+Shift+1**: Grammar fix
+   - **Ctrl+Shift+2**: Translation
+   - **Ctrl+Shift+3**: Code explanation
+   - **Ctrl+Shift+4**: Smart summarize/explain
+5. Review the result in the overlay.
+6. Use the available action:
+   - **Replace Selection** for correction/translation flows
+   - **Copy** action for explanation/summary flows
+   - **Close** to dismiss without changes
 
 ## Codebase Index
 
@@ -91,6 +108,7 @@ Provider/model runtime selection is managed by the Control Center and persisted 
 - The app runs as a background process and is controlled from the system tray icon.
 - Hotkey interception can be blocked by privileged applications; running with elevated permissions may be required on Windows.
 - Provider/model availability depends on valid API credentials and network connectivity.
+- You can open Control Center from the tray to switch providers/models or toggle **Start With Windows**.
 
 ## Troubleshooting
 

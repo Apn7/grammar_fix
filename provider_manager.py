@@ -1,13 +1,13 @@
 import requests
 
-from config import GOOGLE_API_KEY, GROQ_API_KEY
-from gemini_client import GeminiClient
+from config import GROQ_API_KEY
+from vertex_client import VertexClient
 from groq_client import GroqClient
 
 
 PROVIDER_LABELS = {
     "groq": "Groq",
-    "google": "Google Gemini",
+    "google": "Google Vertex AI",
 }
 
 DEFAULT_MODELS = {
@@ -23,13 +23,13 @@ DEFAULT_MODELS = {
         "groq/compound-mini",
     ],
     "google": [
+        "gemini-3.1-pro-preview",
+        "gemini-3.1-flash-lite-preview",
+        "gemini-3-flash-preview",
         "gemini-2.5-flash",
         "gemini-flash-latest",
         "gemini-2.5-pro",
         "gemini-pro-latest",
-        "gemini-3-flash-preview",
-        "gemini-3.1-pro-preview",
-        "gemini-3.1-flash-lite-preview",
     ],
 }
 
@@ -67,7 +67,7 @@ class ProviderManager:
         cache_key = (normalized, selected_model)
         if cache_key not in self._clients:
             if normalized == "google":
-                self._clients[cache_key] = GeminiClient(selected_model)
+                self._clients[cache_key] = VertexClient(selected_model)
             else:
                 self._clients[cache_key] = GroqClient(selected_model)
         return self._clients[cache_key]
@@ -98,28 +98,6 @@ class ProviderManager:
             return []
 
     def _fetch_google_models(self):
-        if not GOOGLE_API_KEY:
-            return []
-
-        try:
-            response = requests.get(
-                "https://generativelanguage.googleapis.com/v1beta/models",
-                params={"key": GOOGLE_API_KEY},
-                timeout=4,
-            )
-            response.raise_for_status()
-            payload = response.json()
-            models = []
-            for item in payload.get("models", []):
-                methods = item.get("supportedGenerationMethods", [])
-                name = item.get("name", "")
-                if "generateContent" not in methods or not name.startswith("models/"):
-                    continue
-                model_name = name.split("/", 1)[1]
-                if any(keyword in model_name for keyword in ("image", "tts", "robotics", "research", "computer-use", "banana")):
-                    continue
-                models.append(model_name)
-            return sorted(set(models))
-        except requests.RequestException as error:
-            print(f"Could not refresh Google models: {error}")
-            return []
+        # Vertex AI publisher models list is not easily available via a single REST GET
+        # without complex project/location scoping. We use the robust defaults.
+        return list(DEFAULT_MODELS["google"])

@@ -1,14 +1,18 @@
 from google import genai
 from google.genai import types
 
+from config import VERTEX_PROJECT_ID, VERTEX_LOCATION
+
 
 class VertexClient:
     def __init__(self, model="gemini-2.5-flash"):
+        if not VERTEX_PROJECT_ID:
+            raise ValueError("VERTEX_PROJECT_ID is not set in .env")
         self.model = model
         self.client = genai.Client(
             vertexai=True,
-            project="",
-            location="us-central1",
+            project=VERTEX_PROJECT_ID,
+            location=VERTEX_LOCATION,
         )
 
     def _generate_text(self, instruction: str, text: str) -> str | None:
